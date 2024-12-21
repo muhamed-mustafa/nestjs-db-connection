@@ -6,30 +6,29 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
   Patch,
   Post,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { UserEntity } from './user.entity';
 import { UserService } from './users.service';
-import { UserResponseDto } from './dtos/user-response.dto';
+import { User } from './schema/user.schema';
+import { ParseMongoIdPipe } from '../mongo/pipes/parse-mongo-id-pipe';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  find(): UserEntity[] {
+  find(): Promise<User[]> {
     return this.userService.findUsers();
   }
 
   @Get(':id')
   findOne(
-    @Param('id', ParseUUIDPipe)
+    @Param('id', ParseMongoIdPipe)
     id: string,
-  ): UserResponseDto {
+  ): Promise<User> {
     return this.userService.findUserById(id);
   }
 
@@ -37,13 +36,13 @@ export class UsersController {
   create(
     @Body()
     createUserDto: CreateUserDto,
-  ): UserResponseDto {
+  ): Promise<User> {
     return this.userService.createUser(createUserDto);
   }
 
   @Patch(':id')
   update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseMongoIdPipe) id: string,
     @Body()
     updateUserDto: UpdateUserDto,
   ) {
@@ -52,7 +51,7 @@ export class UsersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseUUIDPipe) id: string) {
+  remove(@Param('id', ParseMongoIdPipe) id: string) {
     this.userService.deleteUser(id);
   }
 }
